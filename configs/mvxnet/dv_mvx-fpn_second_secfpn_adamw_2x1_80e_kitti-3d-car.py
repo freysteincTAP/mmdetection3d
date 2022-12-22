@@ -28,7 +28,7 @@ model = dict(
     ),
     pts_voxel_encoder=dict(
         type='DynamicVFE',
-        in_channels=4,
+        in_channels=3,    # 4
         feat_channels=[64, 64],
         with_distance=False,
         voxel_size=voxel_size,
@@ -63,18 +63,14 @@ model = dict(
         out_channels=[256, 256]),
     pts_bbox_head=dict(
         type='Anchor3DHead',
-        num_classes=3,
+        num_classes=1, # 3
         in_channels=512,
         feat_channels=512,
         use_direction_classifier=True,
         anchor_generator=dict(
             type='Anchor3DRangeGenerator',
-            ranges=[
-                [0, -40.0, -0.6, 70.4, 40.0, -0.6],
-                [0, -40.0, -0.6, 70.4, 40.0, -0.6],
-                [0, -40.0, -1.78, 70.4, 40.0, -1.78],
-            ],
-            sizes=[[0.8, 0.6, 1.73], [1.76, 0.6, 1.73], [3.9, 1.6, 1.56]],
+            ranges=[[0, -39.68, -1.78, 69.12, 39.68, -1.78]],
+            sizes=[[3.9, 1.6, 1.56]],
             rotations=[0, 1.57],
             reshape_out=False),
         assigner_per_size=True,
@@ -93,21 +89,7 @@ model = dict(
     # model training and testing settings
     train_cfg=dict(
         pts=dict(
-            assigner=[
-                dict(  # for Pedestrian
-                    type='MaxIoUAssigner',
-                    iou_calculator=dict(type='BboxOverlapsNearest3D'),
-                    pos_iou_thr=0.35,
-                    neg_iou_thr=0.2,
-                    min_pos_iou=0.2,
-                    ignore_iof_thr=-1),
-                dict(  # for Cyclist
-                    type='MaxIoUAssigner',
-                    iou_calculator=dict(type='BboxOverlapsNearest3D'),
-                    pos_iou_thr=0.35,
-                    neg_iou_thr=0.2,
-                    min_pos_iou=0.2,
-                    ignore_iof_thr=-1),
+            assigner=
                 dict(  # for Car
                     type='MaxIoUAssigner',
                     iou_calculator=dict(type='BboxOverlapsNearest3D'),
@@ -115,7 +97,6 @@ model = dict(
                     neg_iou_thr=0.45,
                     min_pos_iou=0.45,
                     ignore_iof_thr=-1),
-            ],
             allowed_border=0,
             pos_weight=-1,
             debug=False)),
@@ -132,12 +113,12 @@ model = dict(
 # dataset settings
 dataset_type = 'KittiDataset'
 data_root = 'data/kitti/'
-class_names = ['Pedestrian', 'Cyclist', 'Car']
+class_names = ['Car']
 img_norm_cfg = dict(
-    mean=[103.530, 116.280, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
+    mean=[124.5453, 123.2037, 121.8995], std=[1.0, 1.0, 1.0], to_rgb=False) #a2d2_rgb_values
 input_modality = dict(use_lidar=True, use_camera=True)
 train_pipeline = [
-    dict(type='LoadPointsFromFile', coord_type='LIDAR', load_dim=4, use_dim=4),
+    dict(type='LoadPointsFromFile', coord_type='LIDAR', load_dim=4, use_dim=3),
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations3D', with_bbox_3d=True, with_label_3d=True),
     dict(
@@ -162,7 +143,7 @@ train_pipeline = [
         keys=['points', 'img', 'gt_bboxes_3d', 'gt_labels_3d']),
 ]
 test_pipeline = [
-    dict(type='LoadPointsFromFile', coord_type='LIDAR', load_dim=4, use_dim=4),
+    dict(type='LoadPointsFromFile', coord_type='LIDAR', load_dim=4, use_dim=3),
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug3D',
@@ -191,7 +172,7 @@ test_pipeline = [
 # construct a pipeline for data and gt loading in show function
 # please keep its loading function consistent with test_pipeline (e.g. client)
 eval_pipeline = [
-    dict(type='LoadPointsFromFile', coord_type='LIDAR', load_dim=4, use_dim=4),
+    dict(type='LoadPointsFromFile', coord_type='LIDAR', load_dim=4, use_dim=3),
     dict(type='LoadImageFromFile'),
     dict(
         type='DefaultFormatBundle3D',
@@ -211,7 +192,7 @@ data = dict(
             data_root=data_root,
             ann_file=data_root + 'kitti_infos_train.pkl',
             split='training',
-            pts_prefix='velodyne_reduced',
+            pts_prefix='velodyne',
             pipeline=train_pipeline,
             modality=input_modality,
             classes=class_names,
@@ -222,7 +203,7 @@ data = dict(
         data_root=data_root,
         ann_file=data_root + 'kitti_infos_val.pkl',
         split='training',
-        pts_prefix='velodyne_reduced',
+        pts_prefix='velodyne',
         pipeline=test_pipeline,
         modality=input_modality,
         classes=class_names,
@@ -233,7 +214,7 @@ data = dict(
         data_root=data_root,
         ann_file=data_root + 'kitti_infos_val.pkl',
         split='training',
-        pts_prefix='velodyne_reduced',
+        pts_prefix='velodyne',
         pipeline=test_pipeline,
         modality=input_modality,
         classes=class_names,
@@ -248,4 +229,4 @@ optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 evaluation = dict(interval=1, pipeline=eval_pipeline)
 
 # You may need to download the model first is the network is unstable
-load_from = 'https://download.openmmlab.com/mmdetection3d/pretrain_models/mvx_faster_rcnn_detectron2-caffe_20e_coco-pretrain_gt-sample_kitti-3-class_moderate-79.3_20200207-a4a6a3c7.pth'  # noqa
+# load_from = 'https://download.openmmlab.com/mmdetection3d/pretrain_models/mvx_faster_rcnn_detectron2-caffe_20e_coco-pretrain_gt-sample_kitti-3-class_moderate-79.3_20200207-a4a6a3c7.pth'  # noqa
