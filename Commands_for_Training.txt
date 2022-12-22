@@ -1,14 +1,16 @@
 python tools/train.py configs/synthetic_training_config/dv_mvx-fpn_second_secfpn_adamw_2x1_80e_kitti-3d-car.py --work-dir /mmdetection3d/data/kitti
 
-python tools/create_data.py kitti --root-path /home/freystec/Repos/3D-Object-Detection-Models/mmdetection3d/data/kitti --out-dir /home/freystec/Repos/3D-Object-Detection-Models/mmdetection3d/data/kitti
+python tools/create_data.py kitti --root-path /mmdetection3d/data/kitti --out-dir /mmdetection3d/data/kitti
 
 ln -s /media/Titan-RTX-HDD1/datasets/a2d2_kitti_format_whole_dataset /home/yank/kitti
 
 ln -s /media/Titan-RTX-HDD2/Synthetic_Data /home/yank/Synthetic_Datasets
 
+ln -s /media/Titan-RTX-HDD2/Synthetic_Data/mvxnet-datasets/baseline-datasets/baseline_5_percent /home/yank/Repos/infinity/mmdetection3d/data/kitti
 
 
 
+python tools/train.py configs/mvxnet/dv_mvx-fpn_second_secfpn_adamw_2x1_80e_kitti-3d-car.py --work-dir /mmdetection3d/data/kitti
 
 
 
