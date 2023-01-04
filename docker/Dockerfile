@@ -27,7 +27,7 @@ ARG MMSEG
 RUN ["/bin/bash", "-c", "pip install --no-cache-dir mmcv-full==${MMCV} -f https://download.openmmlab.com/mmcv/dist/cu${CUDA//./}/torch${PYTORCH}/index.html"]
 RUN pip install --no-cache-dir mmdet==${MMDET} mmsegmentation==${MMSEG}
 
-RUN pip install shapely 
+RUN pip install shapely seaborn
 
 # Install MMDetection3D
 RUN conda clean --all
